@@ -1,0 +1,14 @@
+.env
+.venv/
+venv/
+node_modules/
+.next/
+__pycache__/
+.pytest_cache/
+*.pyc
+ai/models/*.joblib
+ai/models/metrics.json
+*.log
+.vscode/
+.DS_Store
+Thumbs.db

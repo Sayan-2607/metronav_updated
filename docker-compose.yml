@@ -1,0 +1,67 @@
+# MetroNav full stack:  cp .env.example .env && docker compose up --build
+# Web UI http://localhost:3000 · API http://localhost:8080 · ML http://localhost:8000/docs
+# Optional Prometheus: docker compose --profile monitoring up --build  (http://localhost:9090)
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: metronav
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-metronav}
+      POSTGRES_DB: metronav
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metronav"]
+      interval: 5s
+      retries: 10
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  ai:
+    build: { context: ., dockerfile: ai/Dockerfile }
+    environment:
+      NETWORK_FILE: /app/data/network.json
+    ports: ["8000:8000"]
+
+  core:
+    build: { context: ., dockerfile: services/core/Dockerfile }
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      ai: { condition: service_started }
+    environment:
+      DATABASE_URL: postgres://metronav:${POSTGRES_PASSWORD:-metronav}@postgres:5432/metronav?sslmode=disable
+      REDIS_ADDR: redis:6379
+      ML_URL: http://ai:8000
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      TICKET_SECRET: ${TICKET_SECRET:?set TICKET_SECRET in .env}
+      INGEST_KEY: ${INGEST_KEY:-dev-ingest-key}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin12345}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      SIM_SPEED: ${SIM_SPEED:-1}
+    ports: ["8080:8080"]
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+        NEXT_PUBLIC_WS_URL: ${PUBLIC_WS_URL:-ws://localhost:8080/api/v1/realtime}
+    depends_on: [core]
+    ports: ["3000:3000"]
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    profiles: [monitoring]
+    volumes: [./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro]
+    ports: ["9090:9090"]
+
+volumes:
+  pgdata:

@@ -1,0 +1,470 @@
+{
+ "_note": "Topology based on publicly known Kolkata Metro station order (Blue, Green, Yellow lines). Segment times, weights, capacities, headways and schematic coordinates are APPROXIMATIONS for simulation only. Verify against official sources before any real use.",
+ "stations": [
+  {
+   "id": "DAKSHINESWAR",
+   "name": "Dakshineswar",
+   "x": 520,
+   "y": 40,
+   "weight": 0.55,
+   "platform_capacity": 2190
+  },
+  {
+   "id": "BARANAGAR",
+   "name": "Baranagar",
+   "x": 520,
+   "y": 68,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "NOAPARA",
+   "name": "Noapara",
+   "x": 520,
+   "y": 96,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "DUM_DUM",
+   "name": "Dum Dum",
+   "x": 520,
+   "y": 124,
+   "weight": 0.9,
+   "platform_capacity": 2820
+  },
+  {
+   "id": "BELGACHHIA",
+   "name": "Belgachhia",
+   "x": 520,
+   "y": 152,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "SHYAMBAZAR",
+   "name": "Shyambazar",
+   "x": 520,
+   "y": 180,
+   "weight": 0.7,
+   "platform_capacity": 2460
+  },
+  {
+   "id": "SHOBHABAZAR_SUTANUTI",
+   "name": "Shobhabazar Sutanuti",
+   "x": 520,
+   "y": 208,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "GIRISH_PARK",
+   "name": "Girish Park",
+   "x": 520,
+   "y": 236,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "MAHATMA_GANDHI_ROAD",
+   "name": "Mahatma Gandhi Road",
+   "x": 520,
+   "y": 264,
+   "weight": 0.75,
+   "platform_capacity": 2550
+  },
+  {
+   "id": "CENTRAL",
+   "name": "Central",
+   "x": 520,
+   "y": 292,
+   "weight": 0.75,
+   "platform_capacity": 2550
+  },
+  {
+   "id": "CHANDNI_CHOWK",
+   "name": "Chandni Chowk",
+   "x": 520,
+   "y": 320,
+   "weight": 0.65,
+   "platform_capacity": 2370
+  },
+  {
+   "id": "ESPLANADE",
+   "name": "Esplanade",
+   "x": 520,
+   "y": 348,
+   "weight": 1.0,
+   "platform_capacity": 3000
+  },
+  {
+   "id": "PARK_STREET",
+   "name": "Park Street",
+   "x": 520,
+   "y": 376,
+   "weight": 0.8,
+   "platform_capacity": 2640
+  },
+  {
+   "id": "MAIDAN",
+   "name": "Maidan",
+   "x": 520,
+   "y": 404,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "RABINDRA_SADAN",
+   "name": "Rabindra Sadan",
+   "x": 520,
+   "y": 432,
+   "weight": 0.65,
+   "platform_capacity": 2370
+  },
+  {
+   "id": "NETAJI_BHAVAN",
+   "name": "Netaji Bhavan",
+   "x": 520,
+   "y": 460,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "JATIN_DAS_PARK",
+   "name": "Jatin Das Park",
+   "x": 520,
+   "y": 488,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "KALIGHAT",
+   "name": "Kalighat",
+   "x": 520,
+   "y": 516,
+   "weight": 0.7,
+   "platform_capacity": 2460
+  },
+  {
+   "id": "RABINDRA_SAROBAR",
+   "name": "Rabindra Sarobar",
+   "x": 520,
+   "y": 544,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "MAHANAYAK_UTTAM_KUMAR",
+   "name": "Mahanayak Uttam Kumar",
+   "x": 520,
+   "y": 572,
+   "weight": 0.75,
+   "platform_capacity": 2550
+  },
+  {
+   "id": "NETAJI",
+   "name": "Netaji",
+   "x": 520,
+   "y": 600,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "MASTERDA_SURYA_SEN",
+   "name": "Masterda Surya Sen",
+   "x": 520,
+   "y": 628,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "GITANJALI",
+   "name": "Gitanjali",
+   "x": 520,
+   "y": 656,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "KAVI_NAZRUL",
+   "name": "Kavi Nazrul",
+   "x": 520,
+   "y": 684,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "SHAHID_KHUDIRAM",
+   "name": "Shahid Khudiram",
+   "x": 520,
+   "y": 712,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "KAVI_SUBHASH",
+   "name": "Kavi Subhash",
+   "x": 520,
+   "y": 740,
+   "weight": 0.6,
+   "platform_capacity": 2280
+  },
+  {
+   "id": "HOWRAH_MAIDAN",
+   "name": "Howrah Maidan",
+   "x": 304,
+   "y": 348,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "HOWRAH",
+   "name": "Howrah",
+   "x": 376,
+   "y": 348,
+   "weight": 0.95,
+   "platform_capacity": 2910
+  },
+  {
+   "id": "MAHAKARAN",
+   "name": "Mahakaran",
+   "x": 448,
+   "y": 348,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "SEALDAH",
+   "name": "Sealdah",
+   "x": 592,
+   "y": 348,
+   "weight": 0.9,
+   "platform_capacity": 2820
+  },
+  {
+   "id": "PHOOLBAGAN",
+   "name": "Phoolbagan",
+   "x": 664,
+   "y": 348,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "SALT_LAKE_STADIUM",
+   "name": "Salt Lake Stadium",
+   "x": 736,
+   "y": 348,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "BENGAL_CHEMICAL",
+   "name": "Bengal Chemical",
+   "x": 808,
+   "y": 348,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "CITY_CENTRE",
+   "name": "City Centre",
+   "x": 880,
+   "y": 348,
+   "weight": 0.6,
+   "platform_capacity": 2280
+  },
+  {
+   "id": "CENTRAL_PARK",
+   "name": "Central Park",
+   "x": 952,
+   "y": 348,
+   "weight": 0.55,
+   "platform_capacity": 2190
+  },
+  {
+   "id": "KARUNAMOYEE",
+   "name": "Karunamoyee",
+   "x": 1024,
+   "y": 348,
+   "weight": 0.65,
+   "platform_capacity": 2370
+  },
+  {
+   "id": "SALT_LAKE_SECTOR_V",
+   "name": "Salt Lake Sector V",
+   "x": 1096,
+   "y": 348,
+   "weight": 0.9,
+   "platform_capacity": 2820
+  },
+  {
+   "id": "DUM_DUM_CANTONMENT",
+   "name": "Dum Dum Cantonment",
+   "x": 610,
+   "y": 96,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "JESSORE_ROAD",
+   "name": "Jessore Road",
+   "x": 700,
+   "y": 96,
+   "weight": 0.45,
+   "platform_capacity": 2010
+  },
+  {
+   "id": "JAI_HIND_BIMANBANDAR",
+   "name": "Jai Hind Bimanbandar",
+   "x": 790,
+   "y": 96,
+   "weight": 0.6,
+   "platform_capacity": 2280
+  }
+ ],
+ "lines": [
+  {
+   "id": "BLUE",
+   "name": "Blue Line",
+   "color": "#1F5FAE",
+   "coaches": 8,
+   "coach_capacity": 300,
+   "headway_min": 6,
+   "stations": [
+    "DAKSHINESWAR",
+    "BARANAGAR",
+    "NOAPARA",
+    "DUM_DUM",
+    "BELGACHHIA",
+    "SHYAMBAZAR",
+    "SHOBHABAZAR_SUTANUTI",
+    "GIRISH_PARK",
+    "MAHATMA_GANDHI_ROAD",
+    "CENTRAL",
+    "CHANDNI_CHOWK",
+    "ESPLANADE",
+    "PARK_STREET",
+    "MAIDAN",
+    "RABINDRA_SADAN",
+    "NETAJI_BHAVAN",
+    "JATIN_DAS_PARK",
+    "KALIGHAT",
+    "RABINDRA_SAROBAR",
+    "MAHANAYAK_UTTAM_KUMAR",
+    "NETAJI",
+    "MASTERDA_SURYA_SEN",
+    "GITANJALI",
+    "KAVI_NAZRUL",
+    "SHAHID_KHUDIRAM",
+    "KAVI_SUBHASH"
+   ],
+   "segment_min": [
+    3,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "id": "GREEN",
+   "name": "Green Line",
+   "color": "#1E8F4E",
+   "coaches": 6,
+   "coach_capacity": 300,
+   "headway_min": 8,
+   "stations": [
+    "HOWRAH_MAIDAN",
+    "HOWRAH",
+    "MAHAKARAN",
+    "ESPLANADE",
+    "SEALDAH",
+    "PHOOLBAGAN",
+    "SALT_LAKE_STADIUM",
+    "BENGAL_CHEMICAL",
+    "CITY_CENTRE",
+    "CENTRAL_PARK",
+    "KARUNAMOYEE",
+    "SALT_LAKE_SECTOR_V"
+   ],
+   "segment_min": [
+    2,
+    3,
+    2,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "id": "YELLOW",
+   "name": "Yellow Line",
+   "color": "#D9A400",
+   "coaches": 6,
+   "coach_capacity": 300,
+   "headway_min": 12,
+   "stations": [
+    "NOAPARA",
+    "DUM_DUM_CANTONMENT",
+    "JESSORE_ROAD",
+    "JAI_HIND_BIMANBANDAR"
+   ],
+   "segment_min": [
+    3,
+    3,
+    3
+   ]
+  }
+ ],
+ "transfer_min": {
+  "ESPLANADE": 6,
+  "NOAPARA": 5
+ },
+ "fare_slabs": [
+  {
+   "max_stations": 2,
+   "fare": 5
+  },
+  {
+   "max_stations": 5,
+   "fare": 10
+  },
+  {
+   "max_stations": 10,
+   "fare": 15
+  },
+  {
+   "max_stations": 15,
+   "fare": 20
+  },
+  {
+   "max_stations": 1000,
+   "fare": 25
+  }
+ ]
+}

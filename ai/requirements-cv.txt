@@ -1,0 +1,3 @@
+# Not exercised end-to-end in this repo; see cv/crowd_counter.py docstring.
+opencv-python-headless>=4.10
+ultralytics>=8.3
