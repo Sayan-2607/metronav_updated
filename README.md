@@ -1,177 +1,1471 @@
 # MetroNav
 
-Metro journey planning with live crowding, coach recommendations, ticketing and an operations console, built as an engineering prototype on a simulated network.
+## Crowd Intelligence, Smart Routing and Predictive Metro Operations Platform
 
-**Stack:** Go (core API, routing, realtime) · Python (FastAPI, scikit-learn) · Next.js + TypeScript + Tailwind · PostgreSQL · Redis · Docker Compose
+MetroNav is an intelligent metro transportation platform designed to combine real-time crowd intelligence, predictive analytics, route optimization, coach-level recommendations, smart ticketing, live network monitoring, and operational simulation into a single system.
 
-> **Read this first.** Train positions, station crowding and coach loads come from a built-in simulator. The ML models are trained on synthetic data. The network topology follows public Kolkata Metro station order, but segment times, fares, capacities and headways are approximations. Nothing here is fit for real operational use. See [Known limitations](#known-limitations).
+The platform uses a Go-based core backend for high-performance routing and real-time services, a Python-based machine learning service for crowd and demand prediction, and a Next.js frontend for passenger and operations interfaces.
+
+MetroNav is designed as an engineering prototype and simulation platform. It does not connect to real metro infrastructure or operational railway systems.
 
 ---
 
-## What it does
+## Overview
 
-| Area | What is implemented |
-|---|---|
-| Journey planning | Dijkstra on a line-expanded graph (node = line+station). Four preference profiles (fastest, least crowded, fewest changes, balanced). Identical itineraries are merged so users only see real trade-offs. |
-| Coach recommendation | For the next train, each coach gets the score `0.7·occupancy/100 + 0.3·distance-to-exit/(n−1)`; lowest wins. The formula is returned by the API. |
-| Arrival prediction | Quantile gradient-boosting (10th/50th/90th percentile), shown as a range. |
-| Crowd forecasting | Gradient boosting at +15/30/60 min, compared against persistence and usual-pattern baselines. |
-| Anomaly detection | Residual z-score against a learned usual-load profile. Detections create incidents automatically. Causes are listed as unverified possibilities. |
-| Live network | WebSocket stream of train positions and station crowding. Slow clients are disconnected instead of blocking others. |
-| Ticketing | HMAC-signed QR tokens. Validation is atomic, so a ticket cannot be used twice. **No payment integration.** |
-| Operations | KPIs, incident workflow (open → acknowledged → resolved), ticket check, model metrics. |
-| Simulation | Inject delays, surges or closures into the live network. Separately, a "what if" fluid-queue projection for one platform, returned with its assumptions. |
-| Camera pipeline | `ai/cv/crowd_counter.py`: YOLO + ByteTrack people counting in a floor zone, sending only aggregate counts. Frames are never stored. **Not evaluated; see limitations.** |
-| Engineering | JWT + role-based access (PASSENGER / OPERATOR / ANALYST / ADMIN), PBKDF2 password hashing, rate limiting, audit log, Prometheus `/metrics`, `/health` and `/ready`. Fallbacks for Postgres, Redis and ML outages. Prediction cache with request coalescing. |
+Traditional metro journey planners primarily focus on static route information such as stations, lines, transfers, and estimated travel time.
 
-## Quick start (Docker)
+MetroNav extends this concept by introducing crowd-aware decision making.
+
+The system can combine:
+
+* Metro network topology
+* Current station occupancy
+* Historical demand patterns
+* Predicted future crowd levels
+* Coach-level congestion
+* Journey duration
+* Number of transfers
+* Service delays
+* Events and holidays
+* Weather conditions
+* Simulated real-time passenger movement
+
+The platform can then provide passengers and operators with more context-aware information.
+
+### Example passenger flow
+
+A passenger can:
+
+1. Select an origin station.
+2. Select a destination station.
+3. Request a route.
+4. Compare possible routes.
+5. View estimated journey time.
+6. View predicted crowd levels.
+7. Receive coach recommendations.
+8. Select a coach during ticket booking.
+9. Monitor the journey through the live interface.
+
+### Example operator flow
+
+An operator can:
+
+1. Open the operations dashboard.
+2. Monitor network activity.
+3. Start or control simulations.
+4. Observe station and coach congestion.
+5. Inspect demand patterns.
+6. Identify anomalies.
+7. Run what-if scenarios.
+8. Monitor system metrics.
+
+---
+
+# Key Features
+
+## 1. Intelligent Route Planning
+
+MetroNav provides route planning across a simulated metro network.
+
+The routing engine considers:
+
+* Origin station
+* Destination station
+* Available connections
+* Transfers
+* Travel time
+* Network topology
+* Crowd conditions
+
+The Go backend contains the core routing implementation.
+
+---
+
+## 2. Crowd Intelligence
+
+The platform models passenger occupancy at stations and coaches.
+
+Crowd information can be represented as:
+
+* Current occupancy
+* Historical occupancy
+* Predicted occupancy
+* Station congestion
+* Coach congestion
+* Crowd intensity
+* Demand trends
+
+Crowd levels are represented on a normalized scale from 0 to 100.
+
+---
+
+## 3. Machine Learning Crowd Prediction
+
+MetroNav includes a dedicated Python machine learning service.
+
+The ML service predicts future crowd levels for multiple time horizons:
+
+* 15 minutes
+* 30 minutes
+* 60 minutes
+
+The model uses features such as:
+
+* Current occupancy
+* Previous occupancy
+* Time
+* Station
+* Historical demand
+* Rain conditions
+* Nearby events
+* Holiday information
+
+The project currently uses synthetic data for model development and evaluation.
+
+This makes the system suitable for demonstrating the architecture without requiring access to proprietary metro passenger datasets.
+
+---
+
+## 4. Demand Forecasting
+
+The demand forecasting pipeline generates and processes historical passenger demand data.
+
+The training system supports:
+
+* Synthetic data generation
+* Feature engineering
+* Model training
+* Model evaluation
+* Baseline comparison
+* Model persistence
+* Metrics generation
+
+The training pipeline can be executed using:
+
+```powershell
+cd ai
+python -m metronav_ai.train
+```
+
+---
+
+## 5. Anomaly Detection
+
+MetroNav includes an anomaly detection service for identifying unusual occupancy patterns.
+
+The anomaly system can detect unexpected changes in observed crowd levels.
+
+Potential examples include:
+
+* Sudden station crowd increases
+* Unexpected occupancy drops
+* Abnormal passenger demand
+* Unusual network conditions
+
+The anomaly API accepts station-level observations and returns detected anomalies.
+
+---
+
+## 6. ETA Prediction
+
+MetroNav includes a machine learning-assisted ETA prediction service.
+
+ETA prediction considers:
+
+* Scheduled travel time
+* Number of stops
+* Number of transfers
+* Mean crowd level
+* Timestamp
+* Delay conditions
+
+The service provides an estimated travel time and can be compared against a baseline estimate.
+
+---
+
+## 7. Coach-Level Crowd Intelligence
+
+Instead of treating an entire train as a single occupancy value, MetroNav models congestion at coach level.
+
+This allows the application to provide recommendations such as:
+
+* Less crowded coach
+* Moderately crowded coach
+* Highly crowded coach
+* Coach-level occupancy visualization
+
+The frontend contains a dedicated coach visualization component.
+
+---
+
+## 8. Smart Ticketing
+
+The ticketing interface allows users to simulate metro journey booking.
+
+The workflow can include:
+
+* Origin selection
+* Destination selection
+* Route selection
+* Coach selection
+* Journey information
+* Ticket information
+
+The ticketing functionality is part of the simulated platform and does not represent a connection to an actual metro ticketing system.
+
+---
+
+## 9. Live Network Interface
+
+The frontend includes a live network interface for displaying simulated metro conditions.
+
+The interface can visualize:
+
+* Stations
+* Routes
+* Crowd levels
+* Train movement
+* Network conditions
+* Journey information
+
+The application is designed to support real-time updates through the backend architecture.
+
+---
+
+## 10. Operations Dashboard
+
+MetroNav includes an administrative operations dashboard.
+
+The dashboard provides interfaces for:
+
+* Network monitoring
+* Simulation
+* Crowd monitoring
+* System activity
+* Operational analysis
+
+The operations interface is intended for demonstration and experimentation.
+
+---
+
+## 11. Network Simulation
+
+The Go backend includes a simulation engine for generating dynamic network activity.
+
+Simulation functionality can model:
+
+* Passenger movement
+* Station demand
+* Crowd changes
+* Train movement
+* Network conditions
+* What-if scenarios
+
+This enables the platform to demonstrate real-time behavior without connecting to real metro infrastructure.
+
+---
+
+## 12. Computer Vision Crowd Counting
+
+MetroNav also includes an optional computer vision pipeline.
+
+Location:
+
+```text
+ai/cv/crowd_counter.py
+```
+
+The computer vision pipeline is designed to estimate crowd levels from camera footage.
+
+It can be extended to support:
+
+* Person detection
+* Crowd counting
+* Occupancy estimation
+* Camera-based station monitoring
+
+The CV component is optional and is separated from the primary ML prediction service.
+
+---
+
+# System Architecture
+
+```text
+                         MetroNav Platform
+                                |
+              +-----------------+-----------------+
+              |                 |                 |
+              v                 v                 v
+       Next.js Frontend     Go Core API       Python ML API
+          Port 3000          Port 8080          Port 8000
+              |                 |                 |
+              |                 |                 |
+              |          +------+-------+         |
+              |          |              |         |
+              |          v              v         |
+              |       Routing       Simulation    |
+              |       Engine        Engine        |
+              |          |              |         |
+              |          +------+-------+         |
+              |                 |                 |
+              |                 v                 |
+              |           Realtime Hub             |
+              |                                   |
+              +----------------+------------------+
+                               |
+                       PostgreSQL / Redis
+                         Optional Storage
+```
+
+---
+
+# Technology Stack
+
+## Frontend
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+
+## Backend
+
+* Go
+* REST APIs
+* WebSocket/realtime architecture
+* JWT authentication
+
+## Machine Learning
+
+* Python
+* FastAPI
+* NumPy
+* Pandas
+* Scikit-learn
+* Joblib
+
+## Computer Vision
+
+* Python
+* OpenCV
+
+## Databases
+
+* PostgreSQL
+* Redis
+
+Both PostgreSQL and Redis are optional for the basic local development environment because the core service supports an in-memory mode.
+
+## Infrastructure
+
+* Docker
+* Docker Compose
+* GitHub Actions
+* Prometheus
+
+---
+
+# Project Structure
+
+```text
+metronav/
+|
+├── ai/
+│   ├── cv/
+│   │   ├── __init__.py
+│   │   └── crowd_counter.py
+│   │
+│   ├── metronav_ai/
+│   │   ├── __init__.py
+│   │   ├── api.py
+│   │   ├── demand.py
+│   │   ├── models.py
+│   │   ├── network.py
+│   │   ├── synthetic.py
+│   │   └── train.py
+│   │
+│   ├── models/
+│   │   └── .gitkeep
+│   │
+│   ├── tests/
+│   │   ├── test_ai.py
+│   │   └── test_cv_counter.py
+│   │
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   └── requirements-cv.txt
+│
+├── apps/
+│   └── web/
+│       ├── app/
+│       │   ├── admin/
+│       │   ├── live/
+│       │   ├── login/
+│       │   ├── tickets/
+│       │   ├── globals.css
+│       │   ├── layout.tsx
+│       │   └── page.tsx
+│       │
+│       ├── components/
+│       │   ├── CoachStrip.tsx
+│       │   ├── Nav.tsx
+│       │   ├── NetworkMap.tsx
+│       │   ├── RouteStrip.tsx
+│       │   └── StationSelect.tsx
+│       │
+│       ├── lib/
+│       │   ├── api.ts
+│       │   ├── format.ts
+│       │   ├── hooks.ts
+│       │   └── types.ts
+│       │
+│       ├── package.json
+│       └── Dockerfile
+│
+├── data/
+│   └── network.json
+│
+├── docs/
+│   ├── api.md
+│   ├── architecture.md
+│   └── ml.md
+│
+├── infrastructure/
+│   └── monitoring/
+│       └── prometheus.yml
+│
+├── services/
+│   └── core/
+│       ├── cmd/
+│       │   ├── loadtest/
+│       │   └── server/
+│       │
+│       ├── internal/
+│       │   ├── api/
+│       │   ├── auth/
+│       │   ├── cache/
+│       │   ├── config/
+│       │   ├── crowd/
+│       │   ├── metrics/
+│       │   ├── ml/
+│       │   ├── network/
+│       │   ├── realtime/
+│       │   ├── route/
+│       │   ├── sim/
+│       │   └── store/
+│       │
+│       ├── Dockerfile
+│       ├── go.mod
+│       └── go.sum
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+# Local Development
+
+## Prerequisites
+
+Install the following:
+
+* Git
+* Go
+* Python 3.11+
+* Node.js 18+
+* npm
+
+PostgreSQL and Redis are optional for the basic development environment.
+
+---
+
+# 1. Clone the Repository
 
 ```bash
-cp .env.example .env     # then set JWT_SECRET, TICKET_SECRET, INGEST_KEY, ADMIN_PASSWORD
+git clone https://github.com/Sayan-2607/metronav_updated.git
+cd metronav_updated
+```
+
+---
+
+# 2. Configure Environment Variables
+
+Create the local environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Do not commit `.env`.
+
+The repository intentionally contains `.env.example` files instead of real credentials.
+
+---
+
+# 3. Start the Machine Learning Service
+
+Open a terminal:
+
+```powershell
+cd ai
+```
+
+Create a virtual environment:
+
+```powershell
+python -m venv .venv
+```
+
+Activate it:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements-dev.txt
+```
+
+---
+
+# 4. Train the ML Models
+
+Run:
+
+```powershell
+python -m metronav_ai.train
+```
+
+The training pipeline generates the required model artifacts locally.
+
+Generated model files are intentionally excluded from Git using `.gitignore`.
+
+After training, start the ML API:
+
+```powershell
+uvicorn metronav_ai.api:app --reload --port 8000
+```
+
+The ML service will be available at:
+
+```text
+http://localhost:8000
+```
+
+Swagger API documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+---
+
+# 5. Verify the ML Service
+
+Open:
+
+```text
+http://localhost:8000/docs
+```
+
+Available endpoints include:
+
+```text
+GET  /health
+GET  /ml/models
+POST /ml/crowd/predict
+POST /ml/anomaly/detect
+POST /ml/eta/predict
+```
+
+You can also test:
+
+```text
+http://localhost:8000/health
+```
+
+---
+
+# 6. Start the Go Core API
+
+Open a second terminal.
+
+```powershell
+cd services/core
+```
+
+Set the ML service URL:
+
+```powershell
+$env:ML_URL="http://localhost:8000"
+```
+
+Start the Go server:
+
+```powershell
+go run ./cmd/server
+```
+
+The core API runs on:
+
+```text
+http://localhost:8080
+```
+
+The Go service provides the main application backend, including:
+
+* Authentication
+* Routing
+* Network operations
+* Simulation
+* Crowd processing
+* ML integration
+* Realtime functionality
+* Metrics
+
+---
+
+# 7. Start the Next.js Frontend
+
+Open a third terminal:
+
+```powershell
+cd apps/web
+```
+
+Install dependencies:
+
+```powershell
+npm install
+```
+
+Start the development server:
+
+```powershell
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# Running MetroNav Locally
+
+MetroNav requires three primary processes during native development.
+
+```text
+Terminal 1
+Python ML Service
+localhost:8000
+
+Terminal 2
+Go Core API
+localhost:8080
+
+Terminal 3
+Next.js Frontend
+localhost:3000
+```
+
+The communication flow is:
+
+```text
+Browser
+   |
+   v
+Next.js
+   |
+   v
+Go Core API
+   |
+   v
+Python ML Service
+```
+
+---
+
+# Docker Development
+
+MetroNav also includes Docker configuration.
+
+From the repository root:
+
+```powershell
 docker compose up --build
 ```
 
-| Service | URL |
-|---|---|
-| Web app | http://localhost:3000 |
-| Core API | http://localhost:8080 (`/ready` shows dependency status) |
-| ML service | http://localhost:8000/docs |
-| Prometheus (optional) | `docker compose --profile monitoring up` → http://localhost:9090 |
+This is intended to start the services defined in `docker-compose.yml`.
 
-Notes on the Docker setup:
-- The ML image trains its models during `docker build`, which takes about 20–60 s.
-- **The Docker setup has not been run by the author.** Docker was not available in the build environment. Each service was run and tested natively, but the images and compose file are unverified. Expect to fix small issues on the first run.
+To stop the services:
 
-**Demo accounts** (created on first start, password = `ADMIN_PASSWORD`, default `admin12345`):
-- `admin@metronav.local` (ADMIN)
-- `operator@metronav.local` (OPERATOR)
+```powershell
+docker compose down
+```
 
-Change the password before sharing any deployment. Passengers register in the app.
+To rebuild:
 
-## Run without Docker
+```powershell
+docker compose up --build
+```
 
-Postgres and Redis are optional. Without them, the core uses an in-memory store (data is lost on restart) and skips Redis mirroring.
+For development and debugging, native execution is recommended because it provides easier access to individual service logs.
 
-```bash
-# 1. ML service (Python 3.12)
-cd ai
-pip install -r requirements-dev.txt
-python -m metronav_ai.train                       # writes models/bundle.joblib + metrics.json
-uvicorn metronav_ai.api:app --port 8000
+---
 
-# 2. Core (Go 1.22+)
+# Authentication
+
+MetroNav uses the Go backend for authentication.
+
+The development environment includes a demo administrator account configured through environment variables.
+
+Default development credentials:
+
+```text
+Email:
+admin@metronav.local
+
+Password:
+admin12345
+```
+
+These credentials are intended only for local development.
+
+For any deployment outside a local development environment, change the administrator password and use secure secrets.
+
+---
+
+# API Services
+
+## Go Core API
+
+```text
+http://localhost:8080
+```
+
+Responsibilities:
+
+* Authentication
+* Route planning
+* Network management
+* Simulation
+* Crowd processing
+* Realtime communication
+* ML service integration
+* Metrics
+
+---
+
+## Python ML API
+
+```text
+http://localhost:8000
+```
+
+Swagger:
+
+```text
+http://localhost:8000/docs
+```
+
+Responsibilities:
+
+* Crowd prediction
+* Demand forecasting
+* Anomaly detection
+* ETA prediction
+* Model management
+
+---
+
+# Machine Learning Pipeline
+
+The ML workflow is:
+
+```text
+Synthetic / Historical Data
+          |
+          v
+Data Generation
+          |
+          v
+Feature Engineering
+          |
+          v
+Model Training
+          |
+          v
+Validation
+          |
+          v
+Model Evaluation
+          |
+          v
+Model Artifact
+          |
+          v
+FastAPI ML Service
+          |
+          v
+Go Core API
+          |
+          v
+Next.js Application
+```
+
+---
+
+# Model Inputs
+
+## Crowd Prediction
+
+The crowd prediction API accepts information such as:
+
+```text
+station_id
+timestamp
+current_occupancy
+occupancy_15m_ago
+occupancy_30m_ago
+rain
+event_nearby
+holiday
+```
+
+Occupancy is represented as a value between:
+
+```text
+0 and 100
+```
+
+---
+
+## ETA Prediction
+
+ETA prediction uses:
+
+```text
+scheduled_min
+stops
+transfers
+mean_crowd
+timestamp
+line_delayed
+```
+
+---
+
+## Anomaly Detection
+
+The anomaly detection endpoint accepts station-level observations.
+
+Each observation contains:
+
+```text
+station_id
+timestamp
+observed
+```
+
+The service supports batches of observations for analysis.
+
+---
+
+# ML Evaluation
+
+The current development dataset is synthetic.
+
+Example training configuration:
+
+```text
+Stations: 40
+Historical period: 56 days
+Time interval: 15 minutes
+Rows: 152,320
+Test period: 14 days
+```
+
+During development, the model was evaluated against persistence and profile-based baselines.
+
+Example development results:
+
+```text
+Crowd prediction
+
+15-minute MAE
+Model:       2.491
+Persistence: 3.434
+Profile:     5.085
+
+30-minute MAE
+Model:       3.140
+Persistence: 5.643
+Profile:     5.107
+
+60-minute MAE
+Model:       3.742
+Persistence: 9.856
+Profile:     5.138
+```
+
+ETA development evaluation:
+
+```text
+Model MAE:          1.356 minutes
+Baseline MAE:       2.558 minutes
+
+Model median error: 1.051 minutes
+Baseline median:    1.889 minutes
+```
+
+These results are based on synthetic development data and should not be interpreted as real-world metro performance.
+
+---
+
+# Computer Vision
+
+MetroNav contains an optional computer vision crowd-counting module:
+
+```text
+ai/cv/crowd_counter.py
+```
+
+The component is designed to process camera input and estimate the number of people in a monitored area.
+
+The CV layer can eventually be integrated with the crowd intelligence pipeline:
+
+```text
+Camera
+  |
+  v
+Person Detection
+  |
+  v
+Crowd Count
+  |
+  v
+Occupancy Estimation
+  |
+  v
+MetroNav Core
+  |
+  v
+Prediction and Monitoring
+```
+
+The current repository treats the CV system as an optional component rather than requiring a camera for normal application operation.
+
+---
+
+# Real-Time Architecture
+
+MetroNav is designed around a real-time event flow.
+
+```text
+Simulation / Sensor / CV
+          |
+          v
+     Crowd Monitor
+          |
+          v
+      Go Core API
+          |
+          v
+     Realtime Hub
+          |
+          v
+      Web Client
+```
+
+This architecture allows the frontend to consume changing network conditions without repeatedly rebuilding the entire application state.
+
+---
+
+# Data Layer
+
+MetroNav supports multiple storage approaches.
+
+## PostgreSQL
+
+PostgreSQL is intended for persistent application data.
+
+Potential data includes:
+
+* Users
+* Tickets
+* Journeys
+* Network information
+* Historical measurements
+* Operational data
+
+## Redis
+
+Redis can be used for:
+
+* Caching
+* Temporary state
+* Realtime workloads
+* Fast-access information
+
+## In-Memory Mode
+
+For local development, the Go service can operate using an in-memory store.
+
+This allows the core service to be developed without requiring PostgreSQL or Redis.
+
+---
+
+# Monitoring
+
+The repository includes Prometheus configuration:
+
+```text
+infrastructure/monitoring/prometheus.yml
+```
+
+The monitoring architecture can be extended to collect:
+
+* API latency
+* Request counts
+* Error rates
+* Simulation metrics
+* ML request metrics
+* Crowd processing metrics
+* System health
+
+---
+
+# Testing
+
+## Python Tests
+
+From the `ai` directory:
+
+```powershell
+pytest
+```
+
+or:
+
+```powershell
+python -m pytest
+```
+
+---
+
+## Go Tests
+
+From:
+
+```text
+services/core
+```
+
+run:
+
+```powershell
+go test ./...
+```
+
+The Go project includes tests covering areas such as:
+
+* Authentication
+* Routing
+* Simulation
+* Crowd monitoring
+* Network behavior
+* API utilities
+
+---
+
+# Load Testing
+
+MetroNav contains a Go load-testing command:
+
+```text
+services/core/cmd/loadtest
+```
+
+Run it with:
+
+```powershell
 cd services/core
-ML_URL=http://localhost:8000 go run ./cmd/server
-# optional: DATABASE_URL=postgres://... REDIS_ADDR=localhost:6379
+go run ./cmd/loadtest
+```
 
-# 3. Web (Node 20+)
+The load-test implementation can be extended to evaluate:
+
+* Concurrent API requests
+* Route calculation performance
+* Realtime workloads
+* Backend throughput
+* Response latency
+
+---
+
+# CI/CD
+
+GitHub Actions configuration is available at:
+
+```text
+.github/workflows/ci.yml
+```
+
+The CI pipeline is intended to validate the project automatically.
+
+The project can be extended with additional checks for:
+
+* Go tests
+* Python tests
+* TypeScript compilation
+* Next.js build
+* Formatting
+* Static analysis
+* Security scanning
+
+---
+
+# Security Considerations
+
+MetroNav is currently a development and research prototype.
+
+Important security practices include:
+
+* Never commit `.env`
+* Never commit production credentials
+* Change default administrator credentials
+* Store secrets using environment variables
+* Use HTTPS in production
+* Use secure JWT configuration
+* Validate API input
+* Apply rate limiting
+* Restrict administrative endpoints
+* Protect database credentials
+* Use secure password hashing
+* Apply appropriate authorization rules
+
+The repository's `.gitignore` intentionally excludes:
+
+```text
+.env
+.venv/
+venv/
+node_modules/
+.next/
+__pycache__/
+*.pyc
+*.log
+```
+
+and generated ML model artifacts.
+
+---
+
+# Development Environment
+
+Recommended development environment:
+
+```text
+Operating System:
+Windows / Linux / macOS
+
+Frontend:
+Node.js 18+
+
+Backend:
+Go
+
+Machine Learning:
+Python 3.11+
+
+Database:
+PostgreSQL
+
+Cache:
+Redis
+
+Containerization:
+Docker / Docker Compose
+```
+
+---
+
+# Current Limitations
+
+MetroNav is an engineering prototype and has several limitations.
+
+## Synthetic Data
+
+The current machine learning system is trained and evaluated using synthetic data.
+
+Real metro datasets would be required for production-grade model validation.
+
+## Simulated Network
+
+The metro network is represented through project data and simulation.
+
+It is not connected to a real metro control system.
+
+## Simulated Tickets
+
+Ticketing functionality is intended for demonstration.
+
+It does not issue real transportation tickets.
+
+## Computer Vision
+
+The CV module is optional and requires an appropriate camera/video input pipeline.
+
+## Production Deployment
+
+The current project is primarily designed for local development, research, demonstrations, and portfolio presentation.
+
+Additional production engineering would be required before deployment at transportation-infrastructure scale.
+
+---
+
+# Future Development
+
+Potential future improvements include:
+
+## Passenger Intelligence
+
+* Personalized route recommendations
+* Accessibility-aware routing
+* Low-crowd route preferences
+* Travel history
+* Personalized travel patterns
+
+## Advanced Crowd Prediction
+
+* Graph neural networks
+* Temporal transformers
+* Spatiotemporal forecasting
+* Multi-station forecasting
+* Real passenger demand datasets
+* Probabilistic forecasting
+
+## Computer Vision
+
+* Multi-camera tracking
+* Improved person detection
+* Station zone detection
+* Platform density estimation
+* Coach-level camera analytics
+
+## Operations Intelligence
+
+* Predictive disruption detection
+* Automated incident alerts
+* Network-wide demand forecasting
+* Train headway optimization
+* Platform congestion prediction
+* What-if operational planning
+
+## Smart Ticketing
+
+* QR-based tickets
+* Dynamic fare calculation
+* Digital ticket validation
+* Payment integration
+* Passenger flow analytics
+
+## Infrastructure
+
+* Kubernetes deployment
+* Horizontal API scaling
+* Distributed event streaming
+* Kafka integration
+* Production observability
+* Distributed tracing
+
+---
+
+# Design Philosophy
+
+MetroNav is designed around several principles.
+
+### Separate Intelligence from Application Logic
+
+Machine learning functionality is isolated inside the Python service while the Go service manages core application logic.
+
+### Keep the Core Backend Fast
+
+Go handles routing, simulation, realtime processing, and API operations.
+
+### Make ML Replaceable
+
+The ML API is accessed through a service boundary so models can be replaced without redesigning the entire application.
+
+### Design for Real-Time Data
+
+The system is structured around continuously changing network conditions rather than static route information alone.
+
+### Develop with Simulation First
+
+Simulation allows the system to be developed and demonstrated without requiring access to real transportation infrastructure.
+
+---
+
+# Project Goals
+
+MetroNav aims to demonstrate how modern software engineering and machine learning can be combined to build intelligent transportation applications.
+
+The project brings together:
+
+```text
+Software Engineering
+        +
+Machine Learning
+        +
+Computer Vision
+        +
+Real-Time Systems
+        +
+Optimization
+        +
+Data Engineering
+        +
+Smart Ticketing
+        +
+Transportation Simulation
+```
+
+The objective is not simply to calculate the shortest route, but to explore how a journey planner can become a context-aware transportation intelligence platform.
+
+---
+
+# Repository
+
+GitHub:
+
+https://github.com/Sayan-2607/metronav_updated
+
+---
+
+# Documentation
+
+Additional technical documentation is available in:
+
+```text
+docs/
+├── api.md
+├── architecture.md
+└── ml.md
+```
+
+---
+
+# Quick Reference
+
+## Start ML
+
+```powershell
+cd ai
+.\.venv\Scripts\Activate.ps1
+uvicorn metronav_ai.api:app --reload --port 8000
+```
+
+## Start Go Core
+
+```powershell
+cd services/core
+$env:ML_URL="http://localhost:8000"
+go run ./cmd/server
+```
+
+## Start Frontend
+
+```powershell
 cd apps/web
-npm install && npm run dev                       # http://localhost:3000
+npm install
+npm run dev
 ```
 
-A few things to know:
-- `SIM_SPEED=10` runs the simulated clock 10× faster, so a whole evening peak plays out in about 20 minutes.
-- The simulated clock starts at the current time in Asia/Kolkata. At night the network is correctly quiet.
+## URLs
 
-**Demo walkthrough:**
-1. Sign in as the operator.
-2. Open **Simulation** and start a crowd surge of +80% at Sealdah.
-3. Watch **Live network** and **Operations**. An anomaly incident should appear within about 10 seconds of real time.
+```text
+Frontend
+http://localhost:3000
 
-## Tests
+Go API
+http://localhost:8080
 
-```bash
-cd services/core && go vet ./... && go test ./...          # 6 packages
-cd ai && python -m pytest -q tests                          # 10 tests
-cd apps/web && npx tsc --noEmit && npm run build
+ML API
+http://localhost:8000
+
+ML Swagger
+http://localhost:8000/docs
 ```
 
-Notable tests:
-- PBKDF2 checked against the RFC 7914 test vector. JWT rejects `alg=none`, a wrong secret and expired tokens. Tampered tickets are rejected.
-- Routing: interchange at Esplanade, closure producing "no route", crowding raising cost, profile de-duplication.
-- Simulator invariants, arrival ordering, scenarios, camera-observation override.
-- Parity tests that pin the same demand-model values in Go and Python, so the two implementations cannot drift apart.
-- Cache request coalescing: 50 concurrent misses produce one upstream call, and errors are never cached.
+---
 
-## Measured results
+# Local Demo Credentials
 
-All numbers below were produced in the build environment. Rerun them yourself before quoting any.
+```text
+Email:
+admin@metronav.local
 
-### Models: synthetic data only
-
-Setup: 40 stations × 56 days at 15-minute resolution (152,320 rows). The last 14 days were held out.
-
-| Crowd forecast (MAE, % points) | Model | Persistence | Usual pattern | Model R² |
-|---|---|---|---|---|
-| +15 min | **2.49** | 3.43 | 5.09 | 0.969 |
-| +30 min | **3.13** | 5.64 | 5.11 | 0.951 |
-| +60 min | **3.73** | 9.86 | 5.14 | 0.931 |
-
-**Anomaly detection.** Threshold z ≥ 3, with synthetic +20–40 point spikes injected into 0.5% of held-out points:
-- Precision 0.53, recall 0.96, F1 0.68, false-positive rate 0.43%.
-- Low precision is expected here: rain and event effects in the synthetic data are not labelled as anomalies, but they still trip the detector.
-
-**Arrival time**, median prediction on held-out synthetic journeys:
-
-| | Mean abs. error | 95th pct. error |
-|---|---|---|
-| Model | 1.36 min | 3.70 min |
-| Timetable | 2.56 min | 7.17 min |
-
-The 10–90% range contained the actual time 77.7% of the time (target 80%).
-
-These numbers show the models learn the patterns the simulator encodes. **They are not evidence of accuracy on real ridership.**
-
-### Load test
-
-Command: `go run ./cmd/loadtest -c 50 -d 20s -ws 500`, run against the core with the ML service up and `RATE_LIMIT_RPS=0`. Machine: 1 CPU, Linux, in-memory store.
-
-- 78,067 requests in 20 s, about **3,900 req/s**
-- Latency: p50 11.8 ms, p95 31.9 ms, p99 40.0 ms
-- 0 errors
-- 500 of 500 WebSocket clients connected, 11,000 messages received
-- The prediction cache served the whole run with 5 model calls; every response used ML output, none used fallbacks
-
-The request mix covered route search, station detail, snapshot and crowd forecast. Client and server shared the same CPU, so treat these figures as indicative only.
-
-### Degradation
-
-**ML service down.** In an earlier run the ML process had exited. The core kept serving all requests with 0 errors: the circuit breaker opened and fallback estimates were used, labelled `"source":"fallback"` in responses.
-
-**Postgres + Redis (native, not Docker).** Verified end to end:
-- Registration and duplicate-email rejection.
-- Role enforcement: a passenger gets 403 on ticket validation.
-- Atomic single-use validation.
-- Incident lifecycle and audit rows.
-- Network seeding.
-- Occupancy persistence, including a camera-sourced row.
-- Redis state keys and the event stream being written.
-
-## Known limitations
-
-- **Simulated data everywhere.** The demand curve (peaks at 9:30 and 18:30, weekend factors, station weights) is an assumption, not fitted to ridership.
-- **Coach loads and exit positions are synthetic.** Exit positions come from a station-ID hash. The "Board" advice uses the train's current load, not a forecast of its load when it reaches you.
-- **Payment is not integrated.** Tickets are issued free. Firebase auth and push notifications were not used; auth is the Go service's own JWT.
-- **The camera pipeline is untested with real video or a real model.** Only its zone-counting and line-crossing logic has unit tests. Measure counting MAE on your own labelled footage before making any accuracy claim.
-- **The "what if" projection is a fluid-queue approximation.** It has no crowd dynamics, train bunching or passenger route switching.
-- **Architecture is a single deployable Go service (modular monolith), not microservices.** Routing, ticketing, simulation, realtime, incidents and ML-client code are separate packages behind narrow interfaces, so they can be split later.
-- **Rate limiting is per process.** `cache.Redis.Allow` exists for a shared limit but isn't wired in by default.
-- **The simulator runs in one process.** Running several core replicas would give each its own simulated network.
-- **Accessibility routing (step-free) is not implemented** because the network data has no accessibility attributes.
-
-## Repository layout
-
-```
-data/network.json            topology + assumptions (shared by Go and Python)
-services/core/               Go: cmd/server, cmd/loadtest, internal/{route,sim,api,auth,store,realtime,crowd,ml,cache,metrics,network,config}
-ai/metronav_ai/              Python: demand model, synthetic data, training, FastAPI service
-ai/cv/crowd_counter.py       camera counting pipeline (optional deps)
-apps/web/                    Next.js app: planner, live map, tickets, operations, simulation
-infrastructure/monitoring/   Prometheus config
-docs/                        architecture, API, data and ML notes
-docker-compose.yml, .github/workflows/ci.yml
+Password:
+admin12345
 ```
 
-More detail: [docs/architecture.md](docs/architecture.md) · [docs/api.md](docs/api.md) · [docs/ml.md](docs/ml.md)
-#   m e t r o n a v _ u p d a t e d  
- 
+Use these credentials only for the local development configuration.
+
+---
+
+# License
+
+If this project is intended for public distribution, add an explicit open-source license such as MIT, Apache-2.0, or another license appropriate to the project.
+
+Until a license is added, the repository should not be assumed to grant broad permission to copy, modify, or redistribute the source code.
+
+---
+
+# Author
+
+Sayan Ghosh
+
+B.Tech Computer Science and Engineering
+
+KIIT University
+
+GitHub:
+
+https://github.com/Sayan-2607
+
+LinkedIn:
+
+https://linkedin.com/in/sayan-g-600ab5307
+
+---
+
+# Project Status
+
+MetroNav is an active engineering prototype focused on:
+
+* Intelligent metro routing
+* Crowd prediction
+* Smart ticketing
+* Coach-level intelligence
+* Real-time simulation
+* Machine learning
+* Computer vision
+* Transportation analytics
+* Operational decision support
+
+The architecture is intentionally modular so that individual components can evolve independently as the project moves toward more realistic datasets, improved prediction models, stronger realtime infrastructure, and production-oriented deployment.
